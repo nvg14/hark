@@ -1,0 +1,23 @@
+[Unit]
+Description=Hark
+ConditionPathExists=/data/hark
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+Restart=always
+WorkingDirectory=/data/hark
+ExecStart=/data/bin/hark
+
+# make sure log directory exists and owned by syslog
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p /var/log/hark
+ExecStartPre=/bin/chown syslog:adm /var/log/hark
+ExecStartPre=/bin/chmod 755 /var/log/hark
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=hark
+
+[Install]
+WantedBy=multi-user.target
