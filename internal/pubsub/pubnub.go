@@ -10,7 +10,6 @@ import (
 
 	"github.com/google/uuid"
 	pubnub "github.com/pubnub/go"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type PubNub struct {
@@ -23,7 +22,7 @@ func NewPubSub(pn *pubnub.PubNub) *PubNub {
 	}
 }
 
-func (p *PubNub) Subscribe(channel string, dbClient *mongo.Client) error {
+func (p *PubNub) Subscribe(channel string) error {
 	listener := pubnub.NewListener()
 	p.pn.AddListener(listener)
 

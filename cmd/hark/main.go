@@ -1,14 +1,10 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
 
-	"go.mongodb.org/mongo-driver/mongo"
-
-	"github.com/nvg14/hark/internal/database"
 	"github.com/nvg14/hark/internal/pubsub"
 	pubnub "github.com/pubnub/go"
 	"github.com/spf13/viper"
@@ -48,22 +44,22 @@ func main() {
 		log.Println(err)
 		return
 	}
-	dbClient, err := database.NewDatabase()
-	if err != nil {
-		log.Println(err)
-		return
-	}
+	// dbClient, err := database.NewDatabase()
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
 
-	app.Action = func(c *cli.Context) error {
-		setAgents(dbClient)
-		return nil
-	}
+	// app.Action = func(c *cli.Context) error {
+	setAgents()
+	// 	return nil
+	// }
 
-	defer func() {
-		if err = dbClient.Disconnect(context.Background()); err != nil {
-			panic(err)
-		}
-	}()
+	// defer func() {
+	// 	if err = dbClient.Disconnect(context.Background()); err != nil {
+	// 		panic(err)
+	// 	}
+	// }()
 
 	// Run the CLI app
 	err = app.Run(os.Args)
@@ -91,7 +87,7 @@ func setViper() error {
 	return nil
 }
 
-func setAgents(dbClient *mongo.Client) error {
+func setAgents() error {
 	var tempAgents Agents
 	viper.UnmarshalKey("agents", &tempAgents)
 	for _, agent := range tempAgents {
@@ -105,7 +101,7 @@ func setAgents(dbClient *mongo.Client) error {
 		pn := pubnub.NewPubNub(config)
 		ps := pubsub.NewPubSub(pn)
 		for _, channel := range agent.Channels {
-			err := ps.Subscribe(channel, dbClient)
+			err := ps.Subscribe(channel)
 			if err != nil {
 				return err
 			}
