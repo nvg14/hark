@@ -1,14 +1,15 @@
 package pubsub
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
-	"time"
+	"os"
+	"path/filepath"
 
+	"github.com/google/uuid"
 	pubnub "github.com/pubnub/go"
-	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -47,17 +48,49 @@ func (p *PubNub) Subscribe(channel string, dbClient *mongo.Client) error {
 				request, _ := json.Marshal(&message.Message)
 				json.Unmarshal(request, &requestBody)
 				fmt.Println(requestBody)
-				collection := dbClient.Database(viper.GetString("mongodb.database")).Collection(channel)
-				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-				defer cancel()
-				res, err := collection.InsertOne(ctx, requestBody)
+				guid, err := uuid.NewRandom()
 				if err != nil {
 					log.Println(err)
-				} else {
-					log.Println(res)
 				}
+				SaveMetadata(requestBody, "/tmp/hark/"+guid.String())
+				// collection := dbClient.Database(viper.GetString("mongodb.database")).Collection(channel)
+				// ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				// defer cancel()
+				// res, err := collection.InsertOne(ctx, requestBody)
+				// if err != nil {
+				// 	log.Println(err)
+				// } else {
+				// 	log.Println(res)
+				// }
 			}
 		}
 	}()
+	return nil
+}
+
+func SaveMetadata(meta interface{}, outputFilepath string) error {
+	data, err := json.MarshalIndent(meta, "", "\t")
+	if err != nil {
+		return err
+	}
+	err = CreatePathIfNotExist(outputFilepath)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(outputFilepath, []byte(data), 0766)
+	return err
+}
+
+func CreatePathIfNotExist(filePath string) error {
+	path, _ := filepath.Abs(filePath)
+	parentDir := filepath.Dir(path)
+	if _, err := os.Stat(parentDir); os.IsNotExist(err) {
+		err = os.MkdirAll(parentDir, 0766)
+		if err != nil {
+			log.Println("Cant create directory")
+			return err
+		}
+	}
 	return nil
 }
