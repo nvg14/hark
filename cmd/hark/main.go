@@ -16,6 +16,7 @@ type Agents []struct {
 	SubscribeKey string
 	SecretKey    string
 	UUID         string
+	CachePath    string
 	Channels     []string
 }
 
@@ -101,7 +102,7 @@ func setAgents() error {
 		pn := pubnub.NewPubNub(config)
 		ps := pubsub.NewPubSub(pn)
 		for _, channel := range agent.Channels {
-			err := ps.Subscribe(channel)
+			err := ps.Subscribe(channel, agent.CachePath)
 			if err != nil {
 				return err
 			}

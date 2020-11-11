@@ -22,7 +22,7 @@ func NewPubSub(pn *pubnub.PubNub) *PubNub {
 	}
 }
 
-func (p *PubNub) Subscribe(channel string) error {
+func (p *PubNub) Subscribe(channel, cachePath string) error {
 	listener := pubnub.NewListener()
 	p.pn.AddListener(listener)
 
@@ -51,7 +51,7 @@ func (p *PubNub) Subscribe(channel string) error {
 				if err != nil {
 					log.Println(err)
 				}
-				SaveMetadata(requestBody, "/tmp/hark/"+guid.String())
+				SaveMetadata(requestBody, cachePath+guid.String())
 				// collection := dbClient.Database(viper.GetString("mongodb.database")).Collection(channel)
 				// ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 				// defer cancel()
