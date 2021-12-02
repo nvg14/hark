@@ -1,6 +1,10 @@
-mongodb:
-    URI: mongodb://127.0.0.1:27017
-    database: hark
+s3:
+    bucket: 
+    region: 
+    access_key: 
+    secret_key: 
+    interval: 3600
+    
 
 agents:
     -
